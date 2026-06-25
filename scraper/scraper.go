@@ -91,15 +91,22 @@ func FetchWorkout(url string) (*Workout, error) {
 // "10min from 30 to 80% FTP"
 // "5x 5min @ 110% FTP, 5min @ 55% FTP"
 // "5min @ 75% FTP"
+// "15min @ 65rpm, from 65 to 92% FTP"
+// "30sec @ 109% FTP"
 func parseDescription(desc string, isFirst, isLast bool) ([]WorkoutStep, error) {
 	desc = normalizeText(desc)
 
+	// Strip cadence annotations like "@ 65rpm," or "@ 85rpm,"
+	cadenceRe := regexp.MustCompile(`@\s*\d+\s*rpm\s*,?\s*`)
+	desc = cadenceRe.ReplaceAllString(desc, "")
+	desc = normalizeText(desc)
+
 	// Pattern: ramp "Xmin from A to B% FTP"
-	rampRe := regexp.MustCompile(`(\d+)min\s+from\s+(\d+)\s*(?:%\s*FTP\s*)?\s*to\s+(\d+)\s*%\s*FTP`)
+	rampRe := regexp.MustCompile(`(\d+)\s*min\s+from\s+(\d+(?:\.\d+)?)\s*(?:%\s*FTP\s*)?\s*to\s+(\d+(?:\.\d+)?)\s*%\s*FTP`)
 	if m := rampRe.FindStringSubmatch(desc); m != nil {
 		dur, _ := strconv.Atoi(m[1])
-		startPct, _ := strconv.Atoi(m[2])
-		endPct, _ := strconv.Atoi(m[3])
+		startPct := parsePercent(m[2])
+		endPct := parsePercent(m[3])
 
 		stepType := StepActive
 		if isFirst {
@@ -156,13 +163,13 @@ func parseDescription(desc string, isFirst, isLast bool) ([]WorkoutStep, error) 
 	return []WorkoutStep{step}, nil
 }
 
-// parseSingleInterval parses "5min @ 110% FTP" or "5min @ 55% FTP"
+// parseSingleInterval parses "5min @ 110% FTP", "30sec @ 109% FTP", "30s @ 55% FTP"
 func parseSingleInterval(text string) (WorkoutStep, error) {
-	// Handle "Xmin @ Y% FTP"
-	re := regexp.MustCompile(`(\d+)\s*min\s*@\s*(\d+)\s*%\s*FTP`)
+	// Handle "Xmin @ Y% FTP" (supports decimal %)
+	re := regexp.MustCompile(`(\d+)\s*min\s*@\s*(\d+(?:\.\d+)?)\s*%\s*FTP`)
 	if m := re.FindStringSubmatch(text); m != nil {
 		dur, _ := strconv.Atoi(m[1])
-		pct, _ := strconv.Atoi(m[2])
+		pct := parsePercent(m[2])
 
 		stepType := StepActive
 		if pct < 70 {
@@ -177,11 +184,11 @@ func parseSingleInterval(text string) (WorkoutStep, error) {
 		}, nil
 	}
 
-	// Handle "Xs @ Y% FTP" (seconds)
-	reSec := regexp.MustCompile(`(\d+)\s*s\s*@\s*(\d+)\s*%\s*FTP`)
+	// Handle "Xs @ Y% FTP" or "Xsec @ Y% FTP" (seconds, supports decimal %)
+	reSec := regexp.MustCompile(`(\d+)\s*(?:sec|s)\s*@\s*(\d+(?:\.\d+)?)\s*%\s*FTP`)
 	if m := reSec.FindStringSubmatch(text); m != nil {
 		dur, _ := strconv.Atoi(m[1])
-		pct, _ := strconv.Atoi(m[2])
+		pct := parsePercent(m[2])
 
 		stepType := StepActive
 		if pct < 70 {
@@ -229,4 +236,15 @@ func normalizeText(s string) string {
 	spaceRe := regexp.MustCompile(`\s+`)
 	s = spaceRe.ReplaceAllString(s, " ")
 	return strings.TrimSpace(s)
+}
+
+// parsePercent parses a percent string that may be decimal (e.g. "109.44999") and rounds to int
+func parsePercent(s string) int {
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		// Fallback to integer parsing
+		v, _ := strconv.Atoi(s)
+		return v
+	}
+	return int(f + 0.5)
 }

@@ -124,10 +124,9 @@ func convertToFitSteps(steps []scraper.WorkoutStep) []fit.Step {
 			// Duration in milliseconds
 			durationMs := uint32(step.DurationSec) * 1000
 
-			// Power targets as % FTP
-			// Average of start/end for the target
-			lowPct := uint32(step.PowerStartPct)
-			highPct := uint32(step.PowerEndPct)
+			// Power targets as % FTP with ±5% buffer
+			lowPct := uint32(step.PowerStartPct) - 5
+			highPct := uint32(step.PowerEndPct) + 5
 
 			fitSteps = append(fitSteps, fit.Step{
 				IsRepeat:         false,
