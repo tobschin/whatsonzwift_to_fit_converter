@@ -101,7 +101,16 @@ Two files are generated in a workout subfolder:
 | 3 | Rest | 5.0 min | 55% |
 | 4 | **Repeat** | — | **5×** |
 
-**Total Duration:** 60 min | **Average Power:** 77% FTP
+**Total Duration:** 60 min | **Average Power:** 77% FTP | **Normalized Power:** 85% FTP
+
+| FTP | Normalized Power |
+|-----|------------------|
+| 250 W | 213 W |
+| 260 W | 221 W |
+| 270 W | 230 W |
+| 280 W | 238 W |
+| 290 W | 247 W |
+| 300 W | 255 W |
 ````
 
 ### Windows

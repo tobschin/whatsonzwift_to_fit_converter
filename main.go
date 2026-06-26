@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -281,7 +282,13 @@ func generateMarkdown(workout *scraper.Workout) string {
 	if totalSec > 0 {
 		avgPower = weightedPower / totalSec
 	}
-	sb.WriteString(fmt.Sprintf("\n**Total Duration:** %d min | **Average Power:** %d%% FTP\n", totalSec/60, avgPower))
+	np := calcNormalizedPower(expanded)
+	sb.WriteString(fmt.Sprintf("\n**Total Duration:** %d min | **Average Power:** %d%% FTP | **Normalized Power:** %d%% FTP\n", totalSec/60, avgPower, np))
+	sb.WriteString("\n| FTP | Normalized Power |\n|-----|------------------|\n")
+	for ftp := 250; ftp <= 300; ftp += 10 {
+		npWatts := int(math.Round(float64(np) * float64(ftp) / 100.0))
+		sb.WriteString(fmt.Sprintf("| %d W | %d W |\n", ftp, npWatts))
+	}
 
 	return sb.String()
 }
@@ -297,6 +304,61 @@ func stepLabel(t scraper.StepType) string {
 	default:
 		return "Active"
 	}
+}
+
+// calcNormalizedPower computes Normalized Power as % FTP using the standard
+// algorithm: 30-second rolling average → raise to 4th power → average → 4th root.
+func calcNormalizedPower(steps []scraper.WorkoutStep) int {
+	// Build second-by-second power array
+	totalSec := 0
+	for _, s := range steps {
+		totalSec += s.DurationSec
+	}
+	if totalSec == 0 {
+		return 0
+	}
+
+	power := make([]float64, totalSec)
+	idx := 0
+	for _, s := range steps {
+		for sec := range s.DurationSec {
+			// Linear interpolation for ramps
+			if s.DurationSec == 1 {
+				power[idx] = float64(s.PowerStartPct)
+			} else {
+				t := float64(sec) / float64(s.DurationSec-1)
+				power[idx] = float64(s.PowerStartPct)*(1-t) + float64(s.PowerEndPct)*t
+			}
+			idx++
+		}
+	}
+
+	// 30-second rolling average
+	window := 30
+	if totalSec < window {
+		window = totalSec
+	}
+	rollingSum := 0.0
+	for i := range window {
+		rollingSum += power[i]
+	}
+
+	fourthPowerSum := 0.0
+	count := 0
+	for i := window - 1; i < totalSec; i++ {
+		if i >= window {
+			rollingSum += power[i] - power[i-window]
+		}
+		avg := rollingSum / float64(window)
+		fourthPowerSum += avg * avg * avg * avg
+		count++
+	}
+
+	if count == 0 {
+		return 0
+	}
+	np := math.Pow(fourthPowerSum/float64(count), 0.25)
+	return int(math.Round(np))
 }
 
 func buildASCIIArt(steps []scraper.WorkoutStep) string {
