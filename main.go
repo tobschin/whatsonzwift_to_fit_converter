@@ -217,8 +217,8 @@ func generateMarkdown(workout *scraper.Workout) string {
 	sb.WriteString("```\n\n")
 
 	// Write interval table
-	sb.WriteString("## Intervalle\n\n")
-	sb.WriteString("| # | Phase | Dauer | % FTP |\n")
+	sb.WriteString("## Intervals\n\n")
+	sb.WriteString("| # | Phase | Duration | % FTP |\n")
 	sb.WriteString("|---|-------|-------|-------|\n")
 
 	idx := 1
@@ -281,7 +281,7 @@ func generateMarkdown(workout *scraper.Workout) string {
 	if totalSec > 0 {
 		avgPower = weightedPower / totalSec
 	}
-	sb.WriteString(fmt.Sprintf("\n**Gesamtdauer:** %d min | **Ø Leistung:** %d%% FTP\n", totalSec/60, avgPower))
+	sb.WriteString(fmt.Sprintf("\n**Total Duration:** %d min | **Average Power:** %d%% FTP\n", totalSec/60, avgPower))
 
 	return sb.String()
 }
@@ -316,8 +316,8 @@ func buildASCIIArt(steps []scraper.WorkoutStep) string {
 
 	// Build columns: each step gets width proportional to duration
 	type column struct {
-		pct    int // average % FTP for this step
-		width  int // character width
+		pct   int // average % FTP for this step
+		width int // character width
 	}
 
 	var cols []column
