@@ -62,13 +62,13 @@ Steps parsed: 13
   Rest: 300s @ 55% FTP
   Repeat 5x
 FIT steps: 13
-Written: output/fit/the_gorby.fit (396 bytes)
-Written: output/md/the_gorby.md
+Written: output/the_gorby/the_gorby.fit (396 bytes)
+Written: output/the_gorby/the_gorby.md
 ```
 
-Two files are generated in subfolders:
-- **`output/fit/the_gorby.fit`** – FIT workout file for import on Garmin/Wahoo/TrainingPeaks
-- **`output/md/the_gorby.md`** – Markdown summary with ASCII art and interval table
+Two files are generated in a workout subfolder:
+- **`output/the_gorby/the_gorby.fit`** – FIT workout file for import on Garmin/Wahoo/TrainingPeaks
+- **`output/the_gorby/the_gorby.md`** – Markdown summary with ASCII art and interval table
 
 ### Example: Generated Markdown (`the_gorby.md`)
 
@@ -95,13 +95,13 @@ Two files are generated in subfolders:
 ## Intervals
 
 | # | Phase | Duration | % FTP |
-|---|-------|----------|-------|
+|---|-------|-------|-------|
 | 1 | Warmup | 10.0 min | 30% → 80% |
 | 2 | Active | 5.0 min | 110% |
 | 3 | Rest | 5.0 min | 55% |
 | 4 | **Repeat** | — | **5×** |
 
-**Total duration:** 60 min
+**Total Duration:** 60 min | **Average Power:** 77% FTP
 ````
 
 ### Windows
@@ -133,6 +133,7 @@ Two files are generated in subfolders:
 - **Steady-State:** `5min @ 75% FTP`
 - **Repeats:** `5x 5min @ 110% FTP, 5min @ 55% FTP`
 - **Seconds Intervals:** `30s @ 150% FTP`
+- **Free Ride:** `2min free ride`
 
 ## Project Structure
 
@@ -144,8 +145,9 @@ Two files are generated in subfolders:
 ├── fit/
 │   └── encoder.go       # FIT file encoder (binary format)
 ├── output/              # Generated files (ignored via .gitignore)
-│   ├── fit/             # .fit workout files
-│   └── md/              # .md summaries
+│   └── <workout_name>/  # .fit and .md per workout
+├── HowToGarmin.md       # Guide: load workouts onto Garmin Edge 540
+├── HowToWahoo.md        # Guide: load workouts onto Wahoo devices
 ├── go.mod
 ├── go.sum
 └── README.md
