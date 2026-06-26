@@ -101,6 +101,29 @@ func parseDescription(desc string, isFirst, isLast bool) ([]WorkoutStep, error) 
 	desc = cadenceRe.ReplaceAllString(desc, "")
 	desc = normalizeText(desc)
 
+	// Pattern: free ride "Xmin free ride" or "Xs free ride"
+	freeRideRe := regexp.MustCompile(`(\d+)\s*(?:min|sec|s)\s+free\s+ride`)
+	if m := freeRideRe.FindStringSubmatch(desc); m != nil {
+		durVal, _ := strconv.Atoi(m[0][:len(m[1])])
+		// Determine if minutes or seconds
+		durSec := durVal * 60
+		if strings.Contains(desc, "sec") || (strings.Contains(desc, "s ") && !strings.Contains(desc, "min")) {
+			durSec = durVal
+		}
+		stepType := StepActive
+		if isFirst {
+			stepType = StepWarmup
+		} else if isLast {
+			stepType = StepCooldown
+		}
+		return []WorkoutStep{{
+			Type:          stepType,
+			DurationSec:   durSec,
+			PowerStartPct: 70,
+			PowerEndPct:   70,
+		}}, nil
+	}
+
 	// Pattern: ramp "Xmin from A to B% FTP"
 	rampRe := regexp.MustCompile(`(\d+)\s*min\s+from\s+(\d+(?:\.\d+)?)\s*(?:%\s*FTP\s*)?\s*to\s+(\d+(?:\.\d+)?)\s*%\s*FTP`)
 	if m := rampRe.FindStringSubmatch(desc); m != nil {
