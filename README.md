@@ -1,8 +1,8 @@
 # WhatsonZwift to FIT Converter
 
-Kommandozeilen-Tool, das Workouts von [whatsonzwift.com](https://whatsonzwift.com) in `.fit`-Dateien konvertiert. Die erzeugten FIT-Dateien arbeiten mit **relativer Leistung (% FTP)** – die tatsächliche Wattzahl wird vom Gerät (Garmin, Wahoo etc.) anhand deiner konfigurierten FTP berechnet.
+Command-line tool that converts workouts from [whatsonzwift.com](https://whatsonzwift.com) into `.fit` files. The generated FIT files use **relative power (% FTP)** – the actual wattage is calculated by your device (Garmin, Wahoo, etc.) based on your configured FTP.
 
-## Voraussetzungen
+## Prerequisites
 
 - [Go](https://go.dev/dl/) ≥ 1.21
 
@@ -20,7 +20,7 @@ go build -o whatsonzwift-to-fit .
 go build -o whatsonzwift-to-fit.exe .
 ```
 
-### Cross-Compilation (auf Mac für andere Plattformen)
+### Cross-Compilation (on Mac for other platforms)
 
 ```bash
 # Linux (amd64)
@@ -30,19 +30,19 @@ GOOS=linux GOARCH=amd64 go build -o whatsonzwift-to-fit-linux .
 GOOS=windows GOARCH=amd64 go build -o whatsonzwift-to-fit.exe .
 ```
 
-## Verwendung
+## Usage
 
 ```bash
 ./whatsonzwift-to-fit <whatsonzwift-workout-url>
 ```
 
-### Beispiel: "The Gorby"
+### Example: "The Gorby"
 
 ```bash
 ./whatsonzwift-to-fit https://whatsonzwift.com/workouts/less-than-60-minutes-to-burn/the-gorby
 ```
 
-**Ausgabe:**
+**Output:**
 
 ```
 Fetching workout from: https://whatsonzwift.com/workouts/less-than-60-minutes-to-burn/the-gorby
@@ -66,11 +66,11 @@ Written: output/fit/the_gorby.fit (396 bytes)
 Written: output/md/the_gorby.md
 ```
 
-Es werden zwei Dateien in Unterordnern erzeugt:
-- **`output/fit/the_gorby.fit`** – FIT-Workout-Datei zum Import auf Garmin/Wahoo/TrainingPeaks
-- **`output/md/the_gorby.md`** – Markdown-Zusammenfassung mit ASCII-Art und Intervall-Tabelle
+Two files are generated in subfolders:
+- **`output/fit/the_gorby.fit`** – FIT workout file for import on Garmin/Wahoo/TrainingPeaks
+- **`output/md/the_gorby.md`** – Markdown summary with ASCII art and interval table
 
-### Beispiel: Generiertes Markdown (`the_gorby.md`)
+### Example: Generated Markdown (`the_gorby.md`)
 
 ````markdown
 # The Gorby
@@ -92,16 +92,16 @@ Es werden zwei Dateien in Unterordnern erzeugt:
       0 min                                                  60 min
 ```
 
-## Intervalle
+## Intervals
 
-| # | Phase | Dauer | % FTP |
-|---|-------|-------|-------|
+| # | Phase | Duration | % FTP |
+|---|-------|----------|-------|
 | 1 | Warmup | 10.0 min | 30% → 80% |
 | 2 | Active | 5.0 min | 110% |
 | 3 | Rest | 5.0 min | 55% |
 | 4 | **Repeat** | — | **5×** |
 
-**Gesamtdauer:** 60 min
+**Total duration:** 60 min
 ````
 
 ### Windows
@@ -110,47 +110,47 @@ Es werden zwei Dateien in Unterordnern erzeugt:
 .\whatsonzwift-to-fit.exe https://whatsonzwift.com/workouts/less-than-60-minutes-to-burn/the-gorby
 ```
 
-## Workout-Struktur (Beispiel: The Gorby)
+## Workout Structure (Example: The Gorby)
 
-| Phase | Dauer | Intensität |
-|-------|-------|------------|
-| Warmup (Rampe) | 10 min | 30% → 80% FTP |
-| Intervall (5×) | 5 min | 110% FTP |
-| Pause (5×) | 5 min | 55% FTP |
+| Phase | Duration | Intensity |
+|-------|----------|----------|
+| Warmup (Ramp) | 10 min | 30% → 80% FTP |
+| Interval (5×) | 5 min | 110% FTP |
+| Rest (5×) | 5 min | 55% FTP |
 
-**Gesamt:** 60 Minuten, 81 Stress Points
+**Total:** 60 minutes, 81 Stress Points
 
-## Wie funktioniert es?
+## How does it work?
 
-1. Die URL wird aufgerufen und das HTML der Workout-Seite geparst
-2. Die Workout-Beschreibung (z.B. `10min from 30 to 80% FTP`, `5x 5min @ 110% FTP, 5min @ 55% FTP`) wird in Intervall-Schritte zerlegt
-3. Rampen werden in 1-Minuten-Schritte aufgeteilt
-4. Die Schritte werden als FIT Workout-Datei mit relativen Leistungszielen (% FTP) kodiert
+1. The URL is fetched and the workout page HTML is parsed
+2. The workout description (e.g. `10min from 30 to 80% FTP`, `5x 5min @ 110% FTP, 5min @ 55% FTP`) is split into interval steps
+3. Ramps are divided into 1-minute steps
+4. The steps are encoded as a FIT workout file with relative power targets (% FTP)
 
-## Unterstützte Workout-Formate
+## Supported Workout Formats
 
-- **Rampen:** `10min from 30 to 80% FTP`
+- **Ramps:** `10min from 30 to 80% FTP`
 - **Steady-State:** `5min @ 75% FTP`
-- **Wiederholungen:** `5x 5min @ 110% FTP, 5min @ 55% FTP`
-- **Sekunden-Intervalle:** `30s @ 150% FTP`
+- **Repeats:** `5x 5min @ 110% FTP, 5min @ 55% FTP`
+- **Seconds Intervals:** `30s @ 150% FTP`
 
-## Projektstruktur
+## Project Structure
 
 ```
 .
-├── main.go              # CLI-Einstiegspunkt
+├── main.go              # CLI entry point
 ├── scraper/
-│   └── scraper.go       # HTML-Scraper für whatsonzwift.com
+│   └── scraper.go       # HTML scraper for whatsonzwift.com
 ├── fit/
-│   └── encoder.go       # FIT-Datei-Encoder (Binärformat)
-├── output/              # Generierte Dateien (via .gitignore ignoriert)
-│   ├── fit/             # .fit Workout-Dateien
-│   └── md/              # .md Zusammenfassungen
+│   └── encoder.go       # FIT file encoder (binary format)
+├── output/              # Generated files (ignored via .gitignore)
+│   ├── fit/             # .fit workout files
+│   └── md/              # .md summaries
 ├── go.mod
 ├── go.sum
 └── README.md
 ```
 
-## Lizenz
+## License
 
 MIT
