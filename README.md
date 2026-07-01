@@ -121,11 +121,11 @@ Two files are generated in a workout subfolder:
 
 ## Workout Structure (Example: The Gorby)
 
-| Phase | Duration | Intensity |
-|-------|----------|----------|
-| Warmup (Ramp) | 10 min | 30% → 80% FTP |
-| Interval (5×) | 5 min | 110% FTP |
-| Rest (5×) | 5 min | 55% FTP |
+| Phase | Duration | Target | FIT Zone (±5%) |
+|-------|----------|--------|----------------|
+| Warmup (Ramp) | 10 min | 30% → 80% FTP | 25-85% FTP |
+| Interval (5×) | 5 min | 110% FTP | 105-115% FTP |
+| Rest (5×) | 5 min | 55% FTP | 50-60% FTP |
 
 **Total:** 60 minutes, 81 Stress Points
 
@@ -134,7 +134,7 @@ Two files are generated in a workout subfolder:
 1. The URL is fetched and the workout page HTML is parsed
 2. The workout description (e.g. `10min from 30 to 80% FTP`, `5x 5min @ 110% FTP, 5min @ 55% FTP`) is split into interval steps
 3. Ramps are divided into 1-minute steps
-4. The steps are encoded as a FIT workout file with relative power targets (% FTP)
+4. The steps are encoded as a FIT workout file with relative power targets (% FTP) — each step gets a ±5% FTP buffer (target zone) so your device accepts slight over-/undershoot for all intervals including rest
 
 ## Supported Workout Formats
 

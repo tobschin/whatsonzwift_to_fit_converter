@@ -186,10 +186,10 @@ func parseDescription(desc string, isFirst, isLast bool) ([]WorkoutStep, error) 
 	return []WorkoutStep{step}, nil
 }
 
-// parseSingleInterval parses "5min @ 110% FTP", "30sec @ 109% FTP", "30s @ 55% FTP"
+// parseSingleInterval parses "5min @ 110% FTP", "5min 110% FTP", "30sec @ 109% FTP", "30s @ 55% FTP"
 func parseSingleInterval(text string) (WorkoutStep, error) {
-	// Handle "Xmin @ Y% FTP" (supports decimal %)
-	re := regexp.MustCompile(`(\d+)\s*min\s*@\s*(\d+(?:\.\d+)?)\s*%\s*FTP`)
+	// Handle "Xmin @ Y% FTP" or "Xmin Y% FTP" (supports decimal %; @ is optional after cadence stripping)
+	re := regexp.MustCompile(`(\d+)\s*min\s*(?:@\s*)?(\d+(?:\.\d+)?)\s*%\s*FTP`)
 	if m := re.FindStringSubmatch(text); m != nil {
 		dur, _ := strconv.Atoi(m[1])
 		pct := parsePercent(m[2])
@@ -207,8 +207,8 @@ func parseSingleInterval(text string) (WorkoutStep, error) {
 		}, nil
 	}
 
-	// Handle "Xs @ Y% FTP" or "Xsec @ Y% FTP" (seconds, supports decimal %)
-	reSec := regexp.MustCompile(`(\d+)\s*(?:sec|s)\s*@\s*(\d+(?:\.\d+)?)\s*%\s*FTP`)
+	// Handle "Xs @ Y% FTP", "Xs Y% FTP" or "Xsec @ Y% FTP" (seconds, supports decimal %; @ is optional)
+	reSec := regexp.MustCompile(`(\d+)\s*(?:sec|s)\s*(?:@\s*)?(\d+(?:\.\d+)?)\s*%\s*FTP`)
 	if m := reSec.FindStringSubmatch(text); m != nil {
 		dur, _ := strconv.Atoi(m[1])
 		pct := parsePercent(m[2])
